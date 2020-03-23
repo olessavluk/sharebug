@@ -10,6 +10,7 @@
 
 import React from 'react';
 import {
+  Button,
   SafeAreaView,
   StyleSheet,
   ScrollView,
@@ -25,6 +26,9 @@ import {
   DebugInstructions,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+
+import Share from 'react-native-share';
+import RNFetchBlob from 'rn-fetch-blob';
 
 declare var global: {HermesInternal: null | {}};
 
@@ -42,6 +46,28 @@ const App = () => {
               <Text style={styles.footer}>Engine: Hermes</Text>
             </View>
           )}
+          <View>
+            <Button
+              onPress={async () => {
+                // create `<Documents>/test/test.txt` file
+                const dir = `${RNFetchBlob.fs.dirs.DocumentDir}/test`;
+                const file = `${dir}/test.txt`;
+                if (!(await RNFetchBlob.fs.exists(file))) {
+                  await RNFetchBlob.fs.mkdir(dir);
+                  await RNFetchBlob.fs.writeFile(
+                    file,
+                    RNFetchBlob.base64.encode('plain text file'),
+                    'base64',
+                  );
+                }
+
+                // file:///data/user/0/com.sharebug/files/test/test.tx
+                const url = `file://${file}`;
+                await Share.open({url, type: 'text/plain'});
+              }}
+              title="Share text.txt"
+            />
+          </View>
           <View style={styles.body}>
             <View style={styles.sectionContainer}>
               <Text style={styles.sectionTitle}>Step One</Text>
